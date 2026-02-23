@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Open VSX Client</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<style>
+/* ── MD3 Dark Design Tokens ─────────────────────────────────── */
+:root {
+  --md-primary: #cfbcff;
+  --md-on-primary: #381e72;
+  --md-primary-container: #4f378b;
+  --md-on-primary-container: #e9ddff;
+  --md-secondary: #cbc2db;
+  --md-on-secondary: #332d41;
+  --md-secondary-container: #4a4458;
+  --md-on-secondary-container: #e8def8;
+  --md-tertiary: #efb8c8;
+  --md-on-tertiary: #492532;
+  --md-surface: #141218;
+  --md-surface-dim: #141218;
+  --md-surface-bright: #3b383e;
+  --md-surface-container-lowest: #0f0d13;
+  --md-surface-container-low: #1d1b20;
+  --md-surface-container: #211f26;
+  --md-surface-container-high: #2b2930;
+  --md-surface-container-highest: #36343b;
+  --md-on-surface: #e6e0e9;
+  --md-on-surface-variant: #cac4d0;
+  --md-outline: #938f99;
+  --md-outline-variant: #49454f;
+  --md-error: #ffb4ab;
+  --md-on-error: #690005;
+  --md-success: #6dd58c;
+  --md-warning: #ffb77a;
+  --md-scrim: rgba(0,0,0,.6);
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 28px;
+  --radius-full: 50px;
+  --elevation-1: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
+  --elevation-2: 0 1px 2px rgba(0,0,0,.3), 0 2px 8px 4px rgba(0,0,0,.15);
+  --elevation-3: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
+  --font: 'Geist', 'Segoe UI', sans-serif;
+  --transition: cubic-bezier(.2,0,0,1);
+}
+
+/* ── Material Icons ──────────────────────────────────────────── */
+.mi{
+  font-family:'Material Icons Round';
+  font-weight:normal;font-style:normal;
+  font-size:20px;line-height:1;
+  letter-spacing:normal;text-transform:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  white-space:nowrap;word-wrap:normal;
+  -webkit-font-feature-settings:'liga';
+  font-feature-settings:'liga';
+  -webkit-font-smoothing:antialiased;
+  vertical-align:middle;
+  user-select:none;
+  flex-shrink:0;
+}
+.mi-18{font-size:18px}
+.mi-16{font-size:16px}
+.mi-24{font-size:24px}
+.mi-36{font-size:36px}
+
+/* ── Reset & Base ────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{
+  font-family:var(--font);
+  background:var(--md-surface);
+  color:var(--md-on-surface);
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  width:100%;
+}
+a{color:var(--md-primary);text-decoration:none}
+a:hover{text-decoration:underline}
+img{max-width:100%}
+button,input,select,textarea{font-family:inherit}
+
+/* ── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--md-surface-container)}
+::-webkit-scrollbar-thumb{background:var(--md-outline);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--md-on-surface-variant)}
+
+/* ── Typography ─────────────────────────────────────────────── */
+.display-lg{font-size:57px;font-weight:400;line-height:64px;letter-spacing:-.25px}
+.display-md{font-size:45px;font-weight:400;line-height:52px}
+.display-sm{font-size:36px;font-weight:400;line-height:44px}
+.headline-lg{font-size:32px;font-weight:400;line-height:40px}
+.headline-md{font-size:28px;font-weight:400;line-height:36px}
+.headline-sm{font-size:24px;font-weight:400;line-height:32px}
+.title-lg{font-size:22px;font-weight:500;line-height:28px}
+.title-md{font-size:16px;font-weight:500;line-height:24px;letter-spacing:.15px}
+.title-sm{font-size:14px;font-weight:500;line-height:20px;letter-spacing:.1px}
+.body-lg{font-size:16px;font-weight:400;line-height:24px;letter-spacing:.5px}
+.body-md{font-size:14px;font-weight:400;line-height:20px;letter-spacing:.25px}
+.body-sm{font-size:12px;font-weight:400;line-height:16px;letter-spacing:.4px}
+.label-lg{font-size:14px;font-weight:500;line-height:20px;letter-spacing:.1px}
+.label-md{font-size:12px;font-weight:500;line-height:16px;letter-spacing:.5px}
+.label-sm{font-size:11px;font-weight:500;line-height:16px;letter-spacing:.5px}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+#app{display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;width:100%}
+.page{display:none;flex-direction:column;min-height:100vh;overflow-x:hidden;animation:fadeIn .2s ease}
+.page.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── Top App Bar ─────────────────────────────────────────────── */
+.top-bar{
+  position:sticky;top:0;z-index:100;
+  background:var(--md-surface-container);
+  border-bottom:1px solid var(--md-outline-variant);
+  padding:0 16px;
+  height:64px;
+  display:flex;align-items:center;gap:12px;
+  width:100%;box-sizing:border-box;
+  overflow:hidden;
+}
+.top-bar-title{
+  font-size:22px;font-weight:600;
+  background:linear-gradient(135deg,var(--md-primary),var(--md-tertiary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.top-bar-spacer{flex:1}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;border:none;
+  background:transparent;color:var(--md-on-surface-variant);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s;
+}
+.icon-btn:hover{background:rgba(202,196,208,.08)}
+.icon-btn:active{background:rgba(202,196,208,.12)}
+.icon-btn.active{color:var(--md-primary)}
+
+/* ── FAB / Settings Badge ────────────────────────────────────── */
+.fab-settings{
+  position:fixed;bottom:24px;right:16px;z-index:200;
+  width:56px;height:56px;border-radius:16px;border:none;
+  background:var(--md-primary-container);color:var(--md-on-primary-container);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--elevation-3);
+  transition:transform .2s var(--transition);
+}
+.fab-settings:hover{transform:scale(1.05)}
+.fab-settings:active{transform:scale(.95)}
+
+/* ── Search Bar ──────────────────────────────────────────────── */
+.search-section{padding:16px;display:flex;flex-direction:column;gap:8px;width:100%;box-sizing:border-box}
+.search-row{display:flex;gap:8px;align-items:center;min-width:0}
+.search-field{
+  flex:1;position:relative;display:flex;align-items:center;
+}
+.search-field input{
+  width:100%;height:48px;
+  background:var(--md-surface-container-high);
+  border:1px solid var(--md-outline-variant);
+  border-radius:var(--radius-full);
+  color:var(--md-on-surface);
+  padding:0 48px 0 20px;
+  font-size:16px;outline:none;
+  transition:border-color .2s,background .2s;
+}
+.search-field input:focus{
+  border-color:var(--md-primary);
+  background:var(--md-surface-container-highest);
+}
+.search-field input::placeholder{color:var(--md-on-surface-variant)}
+.search-clear{
+  position:absolute;right:12px;
+  background:none;border:none;color:var(--md-on-surface-variant);
+  cursor:pointer;padding:4px;border-radius:50%;
+  display:none;line-height:1;align-items:center;
+}
+.search-clear.show{display:flex;align-items:center}
+.search-clear:hover{background:rgba(202,196,208,.1)}
+.btn{
+  height:48px;padding:0 20px;border-radius:var(--radius-full);border:none;
+  font-size:14px;font-weight:500;cursor:pointer;
+  display:flex;align-items:center;gap:8px;white-space:nowrap;
+  transition:transform .1s,box-shadow .2s;
+}
+.btn:active{transform:scale(.97)}
+.btn-search{
+  background:var(--md-primary-container);color:var(--md-on-primary-container);
+}
+.btn-search:hover{background:#5a4396}
+.btn-ai{
+  background:linear-gradient(135deg,#6750a4,#985eff);
+  color:#fff;box-shadow:0 0 16px rgba(151,94,255,.3);
+}
+.btn-ai:hover{box-shadow:0 0 24px rgba(151,94,255,.45)}
+.btn-ai:disabled{
+  background:var(--md-surface-container-highest);
+  color:var(--md-outline);box-shadow:none;cursor:not-allowed;
+}
+.btn-icon{display:inline-flex;align-items:center}
+
+/* ── AI Response Banner ──────────────────────────────────────── */
+.ai-banner{
+  margin:0 16px 8px;padding:16px;
+  background:linear-gradient(135deg,rgba(103,80,164,.15),rgba(152,94,255,.1));
+  border:1px solid rgba(207,188,255,.2);
+  border-radius:var(--radius-lg);
+  display:none;
+  box-sizing:border-box;
+  word-break:break-word;
+}
+.ai-banner.show{display:block}
+.ai-banner-header{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:8px;
+  color:var(--md-primary);
+  font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;
+}
+.ai-banner-text{font-size:14px;color:var(--md-on-surface-variant);line-height:1.6}
+
+/* ── Category Chips ──────────────────────────────────────────── */
+.chips-row{
+  display:flex;gap:8px;padding:0 16px 12px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.chips-row::-webkit-scrollbar{display:none}
+.chip{
+  height:32px;padding:0 16px;border-radius:var(--radius-full);
+  border:1px solid var(--md-outline-variant);
+  background:transparent;color:var(--md-on-surface-variant);
+  font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
+  transition:all .15s;
+}
+.chip:hover{background:rgba(202,196,208,.08)}
+.chip.active{
+  background:var(--md-secondary-container);
+  color:var(--md-on-secondary-container);
+  border-color:transparent;
+}
+
+/* ── Extensions Grid ─────────────────────────────────────────── */
+.ext-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+  padding:0 8px 8px;
+  width:100%;
+  box-sizing:border-box;
+}
+@media(min-width:480px){.ext-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:768px){.ext-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1024px){.ext-grid{grid-template-columns:repeat(4,1fr)}}
+
+/* ── Extension Card ──────────────────────────────────────────── */
+.ext-card{
+  display:flex;flex-direction:column;padding:16px;
+  background:var(--md-surface-container-low);
+  border-radius:var(--radius-lg);
+  border:1px solid var(--md-outline-variant);
+  cursor:pointer;
+  min-width:0;
+  transition:background .15s,border-color .15s,transform .15s;
+  animation:cardIn .3s ease backwards;
+}
+.ext-card:hover{
+  background:var(--md-surface-container);
+  border-color:var(--md-outline);
+  transform:translateY(-2px);
+}
+.ext-card:active{transform:scale(.98)}
+.ext-card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.ext-icon{
+  width:40px;height:40px;border-radius:var(--radius-sm);
+  object-fit:contain;background:var(--md-surface-container-highest);
+  flex-shrink:0;padding:2px;
+}
+.ext-icon-fallback{
+  width:40px;height:40px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--md-primary-container),var(--md-secondary-container));
+  display:flex;align-items:center;justify-content:center;
+  color:var(--md-on-primary-container);flex-shrink:0;
+}
+.ext-meta{flex:1;min-width:0}
+.ext-name{
+  font-size:14px;font-weight:600;color:var(--md-on-surface);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ext-publisher{
+  font-size:12px;color:var(--md-on-surface-variant);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ext-description{
+  font-size:13px;color:var(--md-on-surface-variant);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;flex:1;
+}
+.ext-footer{
+  display:flex;align-items:center;gap:8px;margin-top:10px;
+  padding-top:8px;border-top:1px solid var(--md-outline-variant);
+}
+.ext-version{
+  font-size:11px;color:var(--md-outline);
+  background:var(--md-surface-container-high);
+  padding:2px 8px;border-radius:var(--radius-full);
+}
+.ext-downloads{font-size:11px;color:var(--md-outline);display:flex;align-items:center;gap:4px}
+.ext-tag{
+  font-size:10px;color:var(--md-tertiary);
+  background:rgba(239,184,200,.1);padding:2px 8px;
+  border-radius:var(--radius-full);
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Load More / Spinner ─────────────────────────────────────── */
+.loader{
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;gap:12px;color:var(--md-on-surface-variant);
+  font-size:14px;
+}
+.spinner{
+  width:20px;height:20px;border:2px solid var(--md-outline-variant);
+  border-top-color:var(--md-primary);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#load-trigger{height:1px;width:100%}
+
+/* ── Extension Detail Page ───────────────────────────────────── */
+.detail-page{padding:16px;max-width:800px;margin:0 auto;width:100%;box-sizing:border-box}
+.detail-back{
+  display:flex;align-items:center;gap:8px;
+  color:var(--md-on-surface-variant);font-size:14px;
+  cursor:pointer;margin-bottom:20px;
+  width:fit-content;padding:8px 12px;
+  border-radius:var(--radius-full);
+  background:var(--md-surface-container);
+  border:none;transition:background .15s;
+}
+.detail-back:hover{background:var(--md-surface-container-high)}
+.detail-hero{
+  background:var(--md-surface-container-low);
+  border-radius:var(--radius-xl);
+  padding:24px;margin-bottom:16px;
+  border:1px solid var(--md-outline-variant);
+}
+.detail-hero-top{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}
+.detail-icon{
+  width:72px;height:72px;border-radius:var(--radius-md);
+  object-fit:contain;flex-shrink:0;
+  background:var(--md-surface-container-highest);padding:4px;
+}
+.detail-icon-fallback{
+  width:72px;height:72px;border-radius:var(--radius-md);
+  background:linear-gradient(135deg,var(--md-primary-container),var(--md-secondary-container));
+  display:flex;align-items:center;justify-content:center;
+  color:var(--md-on-primary-container);flex-shrink:0;
+}
+.detail-info{flex:1}
+.detail-name{font-size:22px;font-weight:700;margin-bottom:4px}
+.detail-publisher{font-size:14px;color:var(--md-on-surface-variant);margin-bottom:8px}
+.detail-description{font-size:15px;line-height:1.6;color:var(--md-on-surface-variant)}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-primary{
+  height:40px;padding:0 24px;border-radius:var(--radius-full);border:none;
+  background:var(--md-primary);color:var(--md-on-primary);
+  font-size:14px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:opacity .15s;
+}
+.btn-primary:hover{opacity:.88}
+.btn-tonal{
+  height:40px;padding:0 24px;border-radius:var(--radius-full);border:none;
+  background:var(--md-secondary-container);color:var(--md-on-secondary-container);
+  font-size:14px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:opacity .15s;
+}
+.btn-tonal:hover{opacity:.88}
+.btn-outlined{
+  height:40px;padding:0 20px;border-radius:var(--radius-full);
+  border:1px solid var(--md-outline);
+  background:transparent;color:var(--md-primary);
+  font-size:14px;font-weight:500;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:background .15s;
+}
+.btn-outlined:hover{background:rgba(207,188,255,.08)}
+
+.detail-stats{
+  display:flex;gap:0;margin-top:16px;
+  border-top:1px solid var(--md-outline-variant);
+  padding-top:16px;flex-wrap:wrap;
+  overflow:hidden;
+}
+.stat{
+  flex:1;text-align:center;padding:8px 12px;min-width:70px;
+}
+.stat-value{font-size:18px;font-weight:600;color:var(--md-on-surface);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-label{font-size:11px;color:var(--md-outline);text-transform:uppercase;letter-spacing:.5px}
+
+.detail-section{
+  background:var(--md-surface-container-low);
+  border-radius:var(--radius-xl);padding:20px;
+  margin-bottom:16px;border:1px solid var(--md-outline-variant);
+}
+.detail-section-title{
+  font-size:16px;font-weight:600;margin-bottom:14px;
+  color:var(--md-on-surface);display:flex;align-items:center;gap:8px;
+}
+.version-list{display:flex;flex-direction:column;gap:6px}
+.version-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:var(--radius-md);
+  background:var(--md-surface-container);
+  border:1px solid transparent;cursor:pointer;
+  transition:border-color .15s,background .15s;
+}
+.version-item:hover{border-color:var(--md-outline-variant);background:var(--md-surface-container-high)}
+.version-item.active{border-color:var(--md-primary);background:rgba(207,188,255,.05)}
+.version-badge{
+  font-size:13px;font-weight:600;color:var(--md-on-surface);
+}
+.version-date{font-size:12px;color:var(--md-outline)}
+.version-dl{
+  font-size:11px;color:var(--md-on-surface-variant);
+  display:flex;align-items:center;gap:4px;
+}
+
+.tags-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.tag-chip{
+  padding:4px 14px;border-radius:var(--radius-full);
+  background:var(--md-surface-container);
+  border:1px solid var(--md-outline-variant);
+  font-size:12px;color:var(--md-on-surface-variant);
+}
+
+/* ── Settings Page ───────────────────────────────────────────── */
+.settings-page{padding:16px;max-width:600px;margin:0 auto;width:100%;box-sizing:border-box}
+.settings-title{
+  font-size:28px;font-weight:700;margin-bottom:24px;
+  background:linear-gradient(135deg,var(--md-primary),var(--md-tertiary));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.settings-card{
+  background:var(--md-surface-container-low);
+  border-radius:var(--radius-xl);padding:20px;
+  margin-bottom:16px;border:1px solid var(--md-outline-variant);
+}
+.settings-card-title{
+  font-size:16px;font-weight:600;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.settings-card-desc{font-size:13px;color:var(--md-on-surface-variant);margin-bottom:16px;line-height:1.6}
+.field-group{display:flex;flex-direction:column;gap:6px}
+.field-label{font-size:12px;font-weight:600;color:var(--md-on-surface-variant);letter-spacing:.5px;text-transform:uppercase}
+.field-input-wrap{position:relative;display:flex;align-items:center}
+.field-input{
+  width:100%;height:52px;padding:0 48px 0 16px;
+  background:var(--md-surface-container-high);
+  border:1px solid var(--md-outline-variant);
+  border-radius:var(--radius-md);
+  color:var(--md-on-surface);font-size:15px;outline:none;
+  font-family:var(--font);transition:border-color .2s;
+}
+.field-input:focus{border-color:var(--md-primary)}
+.field-input::placeholder{color:var(--md-outline)}
+.field-toggle{
+  position:absolute;right:12px;background:none;border:none;
+  color:var(--md-on-surface-variant);cursor:pointer;
+  padding:4px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.field-toggle:hover{background:rgba(202,196,208,.1)}
+
+.status-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:var(--radius-full);
+  font-size:12px;font-weight:500;margin-top:10px;
+}
+.status-ok{background:rgba(109,213,140,.1);color:var(--md-success)}
+.status-err{background:rgba(255,180,171,.1);color:var(--md-error)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.link-external{
+  display:inline-flex;align-items:center;gap:6px;
+  color:var(--md-primary);font-size:13px;font-weight:500;
+}
+.settings-save-btn{
+  width:100%;height:48px;border-radius:var(--radius-full);border:none;
+  background:var(--md-primary);color:var(--md-on-primary);
+  font-size:15px;font-weight:600;cursor:pointer;margin-top:12px;
+  transition:opacity .15s;
+}
+.settings-save-btn:hover{opacity:.88}
+
+.settings-section-label{
+  font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  color:var(--md-outline);margin:20px 0 8px;padding:0 4px;
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--md-surface-container-highest);
+  color:var(--md-on-surface);padding:12px 20px;
+  border-radius:var(--radius-sm);box-shadow:var(--elevation-3);
+  font-size:14px;z-index:999;opacity:0;
+  transition:all .3s var(--transition);pointer-events:none;
+  white-space:normal;
+  word-break:break-word;
+  max-width:calc(100vw - 48px);
+  width:max-content;
+  text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ── Empty / Error States ────────────────────────────────────── */
+.empty-state{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 24px;text-align:center;
+}
+.empty-icon{font-size:64px;margin-bottom:16px;opacity:.5;
+  font-family:'Material Icons Round';font-feature-settings:'liga';
+  -webkit-font-smoothing:antialiased;line-height:1;}
+.empty-title{font-size:18px;font-weight:600;margin-bottom:8px}
+.empty-desc{font-size:14px;color:var(--md-on-surface-variant);max-width:280px;line-height:1.6}
+
+/* ── Shimmer Skeleton ────────────────────────────────────────── */
+.skeleton{
+  background:linear-gradient(90deg,
+    var(--md-surface-container-high) 25%,
+    var(--md-surface-container-highest) 50%,
+    var(--md-surface-container-high) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:var(--radius-sm);
+}
+@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
+.skel-card{
+  height:140px;margin:4px;
+  border-radius:var(--radius-lg);
+}
+
+/* ── Misc ────────────────────────────────────────────────────── */
+.divider{height:1px;background:var(--md-outline-variant);margin:12px 0}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;
+  border-radius:var(--radius-full);
+  background:var(--md-primary);color:var(--md-on-primary);
+  font-size:11px;font-weight:700;
+}
+.no-results{
+  padding:32px 24px;text-align:center;
+  color:var(--md-on-surface-variant);font-size:14px;
+}
+
+/* ── AI Thinking Anim ────────────────────────────────────────── */
+.ai-dots{display:inline-flex;gap:4px;align-items:center}
+.ai-dots span{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--md-primary);
+  animation:blink 1.4s infinite both;
+}
+.ai-dots span:nth-child(2){animation-delay:.2s}
+.ai-dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+
+/* ── AI Result Cards ─────────────────────────────────────────── */
+.ai-result-section{
+  margin:0 16px 16px;
+  border:1px solid rgba(207,188,255,.25);
+  border-radius:var(--radius-xl);overflow:hidden;
+  box-sizing:border-box;
+}
+.ai-result-header{
+  padding:12px 16px;
+  background:linear-gradient(135deg,rgba(103,80,164,.2),rgba(152,94,255,.15));
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;color:var(--md-primary);
+  letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid rgba(207,188,255,.15);
+}
+.ai-results-list{display:flex;flex-direction:column}
+.ai-result-item{
+  padding:14px 16px;display:flex;align-items:flex-start;gap:12px;
+  border-bottom:1px solid var(--md-outline-variant);cursor:pointer;
+  transition:background .15s;
+}
+.ai-result-item:last-child{border-bottom:none}
+.ai-result-item:hover{background:var(--md-surface-container)}
+.ai-result-rank{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--md-primary-container);color:var(--md-on-primary-container);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px;
+}
+.ai-result-body{flex:1}
+.ai-result-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.ai-result-reason{font-size:12px;color:var(--md-on-surface-variant);line-height:1.5}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ═══════════════════ HOME PAGE ════════════════════════════ -->
+  <div id="page-home" class="page active">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <span class="top-bar-title">Open VSX</span>
+      <div class="top-bar-spacer"></div>
+      <button class="icon-btn" title="Refresh" onclick="refreshExtensions()"><span class="mi">refresh</span></button>
+    </header>
+
+    <!-- Search -->
+    <div class="search-section">
+      <div class="search-row">
+        <div class="search-field">
+          <input type="search" id="search-input" placeholder="Cari ekstensi..." autocomplete="off"
+            oninput="onSearchInput(this.value)"/>
+          <button class="search-clear" id="search-clear" onclick="clearSearch()"><span class="mi mi-18">close</span></button>
+        </div>
+        <button class="btn btn-search" onclick="doSearch()">
+          <span class="btn-icon"><span class="mi mi-18">search</span></span>Cari
+        </button>
+        <button class="btn btn-ai" id="ai-btn" onclick="doAiSearch()" title="AI Search">
+          <span class="btn-icon"><span class="mi mi-18">auto_awesome</span></span>AI
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Banner -->
+    <div class="ai-banner" id="ai-banner">
+      <div class="ai-banner-header">
+        <span class="mi mi-16">auto_awesome</span> AI Search
+      </div>
+      <div class="ai-banner-text" id="ai-banner-text"></div>
+    </div>
+
+    <!-- AI Results (Gemini picks) -->
+    <div class="ai-result-section" id="ai-result-section" style="display:none">
+      <div class="ai-result-header">
+        <span class="mi mi-16">recommend</span> Rekomendasi Gemini
+        <span id="ai-result-count" class="badge">0</span>
+      </div>
+      <div class="ai-results-list" id="ai-results-list"></div>
+    </div>
+
+    <!-- Category Chips -->
+    <div class="chips-row" id="chips-row">
+      <button class="chip active" onclick="filterCategory('')" data-cat="">Semua</button>
+      <button class="chip" onclick="filterCategory('Programming Languages')" data-cat="Programming Languages">Bahasa Pemrograman</button>
+      <button class="chip" onclick="filterCategory('Themes')" data-cat="Themes">Tema</button>
+      <button class="chip" onclick="filterCategory('Snippets')" data-cat="Snippets">Snippets</button>
+      <button class="chip" onclick="filterCategory('Linters')" data-cat="Linters">Linters</button>
+      <button class="chip" onclick="filterCategory('Formatters')" data-cat="Formatters">Formatters</button>
+      <button class="chip" onclick="filterCategory('Debuggers')" data-cat="Debuggers">Debuggers</button>
+      <button class="chip" onclick="filterCategory('Keymaps')" data-cat="Keymaps">Keymaps</button>
+      <button class="chip" onclick="filterCategory('Other')" data-cat="Other">Lainnya</button>
+    </div>
+
+    <!-- Extensions Grid -->
+    <div class="ext-grid" id="ext-grid"></div>
+    <div id="load-trigger"></div>
+    <div class="loader" id="loader" style="display:none">
+      <div class="spinner"></div>
+      <span>Memuat ekstensi...</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ DETAIL PAGE ═════════════════════════ -->
+  <div id="page-detail" class="page">
+    <header class="top-bar">
+      <button class="icon-btn" onclick="goHome()" title="Kembali"><span class="mi">arrow_back</span></button>
+      <span class="top-bar-title" id="detail-bar-title">Detail</span>
+      <div class="top-bar-spacer"></div>
+      <button class="icon-btn" id="detail-external-btn" title="Buka di Open VSX" onclick="openExternal()"><span class="mi">open_in_new</span></button>
+    </header>
+    <div class="detail-page" id="detail-page-content">
+      <div class="loader"><div class="spinner"></div><span>Memuat...</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SETTINGS PAGE ══════════════════════ -->
+  <div id="page-settings" class="page">
+    <header class="top-bar">
+      <button class="icon-btn" onclick="goHome()" title="Kembali"><span class="mi">arrow_back</span></button>
+      <span class="top-bar-title">Pengaturan</span>
+    </header>
+    <div class="settings-page">
+      <div class="settings-title">Pengaturan</div>
+
+      <!-- Gemini API Key -->
+      <div class="settings-card">
+        <div class="settings-card-title"><span class="mi mi-18">auto_awesome</span> Gemini AI Search</div>
+        <div class="settings-card-desc">
+          Aktifkan AI Search menggunakan Google Gemini API. Masukkan API Key Anda untuk mulai menggunakan fitur pencarian cerdas berbasis AI.
+        </div>
+        <div class="field-group">
+          <label class="field-label">Gemini API Key</label>
+          <div class="field-input-wrap">
+            <input type="password" class="field-input" id="gemini-key-input"
+              placeholder="AIza..." autocomplete="off"/>
+            <button class="field-toggle" onclick="toggleKeyVisibility()" id="key-toggle"><span class="mi mi-18">visibility</span></button>
+          </div>
+        </div>
+        <div id="api-status"></div>
+        <button class="settings-save-btn" onclick="saveApiKey()">Simpan API Key</button>
+        <div style="margin-top:14px">
+          <a class="link-external" href="https://aistudio.google.com/app/apikey" target="_blank">
+            <span class="mi mi-16">open_in_new</span> Dapatkan API Key gratis di Google AI Studio
+          </a>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="settings-card" style="margin-top:16px">
+        <div class="settings-card-title"><span class="mi mi-18">info</span> Tentang</div>
+        <div class="settings-card-desc">
+          <b>Open VSX Client</b> — Klien alternatif untuk Open VSX Registry dengan kemampuan pencarian bertenaga AI.<br/><br/>
+          Data ekstensi disediakan oleh <a href="https://open-vsx.org" target="_blank">open-vsx.org</a> API.<br/>
+          AI Search menggunakan Google Gemini untuk memahami maksud pencarian Anda.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FAB Settings -->
+<button class="fab-settings" id="fab-settings" onclick="goSettings()" title="Pengaturan"><span class="mi mi-24">settings</span></button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const STATE = {
+  page: 'home',
+  query: '',
+  category: '',
+  offset: 0,
+  size: 20,
+  loading: false,
+  hasMore: true,
+  extensions: [],
+  currentDetail: null,
+  geminiKey: localStorage.getItem('gemini_api_key') || '',
+  aiResults: null,
+  aiSearchMode: false,
+};
+const API = 'https://open-vsx.org/api';
+
+// ══════════════════════════════════════════════════════════════
+// ROUTER
+// ══════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('fab-settings').style.display =
+    name === 'settings' ? 'none' : 'flex';
+  STATE.page = name;
+}
+function goHome() {
+  showPage('home');
+}
+function goSettings() {
+  loadSettings();
+  showPage('settings');
+}
+function goDetail(ns, name) {
+  showPage('detail');
+  loadDetail(ns, name);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════════════════════
+function onSearchInput(v) {
+  const clear = document.getElementById('search-clear');
+  clear.classList.toggle('show', v.length > 0);
+}
+function clearSearch() {
+  const input = document.getElementById('search-input');
+  input.value = '';
+  onSearchInput('');
+  STATE.query = '';
+  STATE.aiSearchMode = false;
+  hideAiBanner();
+  hideAiResults();
+  resetAndLoad();
+}
+function doSearch() {
+  STATE.query = document.getElementById('search-input').value.trim();
+  STATE.aiSearchMode = false;
+  hideAiBanner();
+  hideAiResults();
+  resetAndLoad();
+}
+function filterCategory(cat) {
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.cat === cat);
+  });
+  STATE.category = cat;
+  STATE.aiSearchMode = false;
+  hideAiBanner();
+  hideAiResults();
+  resetAndLoad();
+}
+function resetAndLoad() {
+  STATE.offset = 0;
+  STATE.hasMore = true;
+  STATE.extensions = [];
+  document.getElementById('ext-grid').innerHTML = '';
+  loadExtensions();
+}
+function refreshExtensions() {
+  resetAndLoad();
+}
+
+// ══════════════════════════════════════════════════════════════
+// FETCH EXTENSIONS
+// ══════════════════════════════════════════════════════════════
+async function loadExtensions() {
+  if (STATE.loading || !STATE.hasMore) return;
+  STATE.loading = true;
+  const loader = document.getElementById('loader');
+  loader.style.display = 'flex';
+
+  const params = new URLSearchParams({
+    offset: STATE.offset,
+    size: STATE.size,
+    sortBy: 'downloadCount',
+    sortOrder: 'desc',
+  });
+  if (STATE.query) params.set('query', STATE.query);
+  if (STATE.category) params.set('category', STATE.category);
+
+  try {
+    const res = await fetch(`${API}/-/search?${params}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const exts = data.extensions || [];
+    STATE.extensions.push(...exts);
+    STATE.offset += exts.length;
+    if (exts.length < STATE.size || !data.extensions) STATE.hasMore = false;
+    renderExtensions(exts);
+  } catch (e) {
+    console.error(e);
+    if (STATE.extensions.length === 0) {
+      document.getElementById('ext-grid').innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">wifi_off</div>
+          <div class="empty-title">Gagal memuat</div>
+          <div class="empty-desc">Periksa koneksi internet Anda dan coba lagi.</div>
+        </div>`;
+    }
+  } finally {
+    STATE.loading = false;
+    loader.style.display = 'none';
+  }
+}
+
+function renderExtensions(exts) {
+  const grid = document.getElementById('ext-grid');
+  if (exts.length === 0 && STATE.extensions.length === 0) {
+    grid.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">search_off</div>
+        <div class="empty-title">Tidak ditemukan</div>
+        <div class="empty-desc">Coba kata kunci berbeda atau hapus filter kategori.</div>
+      </div>`;
+    return;
+  }
+  const fragment = document.createDocumentFragment();
+  exts.forEach((ext, i) => {
+    const card = createExtCard(ext, i);
+    fragment.appendChild(card);
+  });
+  grid.appendChild(fragment);
+}
+
+function createExtCard(ext, animIndex) {
+  const card = document.createElement('div');
+  card.className = 'ext-card';
+  card.style.animationDelay = (animIndex * 40) + 'ms';
+  card.onclick = () => goDetail(ext.namespace, ext.name);
+
+  const iconEl = ext.files?.icon
+    ? `<img class="ext-icon" src="${ext.files.icon}" alt="${ext.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/>
+       <div class="ext-icon-fallback" style="display:none"><span class="mi mi-18">extension</span></div>`
+    : `<div class="ext-icon-fallback"><span class="mi mi-18">extension</span></div>`;
+
+  const downloads = ext.downloadCount
+    ? formatNum(ext.downloadCount)
+    : '–';
+  const tags = (ext.tags || []).slice(0,2);
+
+  card.innerHTML = `
+    <div class="ext-card-header">
+      ${iconEl}
+      <div class="ext-meta">
+        <div class="ext-name">${escHtml(ext.displayName || ext.name)}</div>
+        <div class="ext-publisher">${escHtml(ext.namespace)}</div>
+      </div>
+    </div>
+    <div class="ext-description">${escHtml(ext.description || 'Tidak ada deskripsi.')}</div>
+    <div class="ext-footer">
+      <span class="ext-version">v${escHtml(ext.version || '?')}</span>
+      <span class="ext-downloads"><span class="mi mi-16">download</span> ${downloads}</span>
+      ${tags.map(t => `<span class="ext-tag">${escHtml(t)}</span>`).join('')}
+    </div>`;
+  return card;
+}
+
+// ══════════════════════════════════════════════════════════════
+// INFINITE SCROLL
+// ══════════════════════════════════════════════════════════════
+const obs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting && STATE.page === 'home') {
+    loadExtensions();
+  }
+}, { rootMargin: '200px' });
+obs.observe(document.getElementById('load-trigger'));
+
+// ══════════════════════════════════════════════════════════════
+// DETAIL PAGE
+// ══════════════════════════════════════════════════════════════
+let currentExtUrl = '';
+async function loadDetail(ns, name) {
+  const content = document.getElementById('detail-page-content');
+  const titleEl = document.getElementById('detail-bar-title');
+  titleEl.textContent = name;
+  content.innerHTML = '<div class="loader"><div class="spinner"></div><span>Memuat detail...</span></div>';  currentExtUrl = `https://open-vsx.org/extension/${ns}/${name}`;
+
+  try {
+    const res = await fetch(`${API}/${ns}/${name}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const ext = await res.json();
+    STATE.currentDetail = ext;
+    renderDetail(ext, content);
+  } catch (e) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">error_outline</div>
+        <div class="empty-title">Gagal memuat detail</div>
+        <div class="empty-desc">${e.message}</div>
+      </div>`;
+  }
+}
+
+function renderDetail(ext, container) {
+  const iconEl = ext.files?.icon
+    ? `<img class="detail-icon" src="${ext.files.icon}" alt="${ext.name}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"/>
+       <div class="detail-icon-fallback" style="display:none"><span class="mi mi-36">extension</span></div>`
+    : `<div class="detail-icon-fallback"><span class="mi mi-36">extension</span></div>`;
+
+  const dlUrl = ext.files?.download || '#';
+  const vsixUrl = ext.files?.download;
+
+  const versions = ext.allVersions
+    ? Object.entries(ext.allVersions)
+        .sort((a,b) => b[0].localeCompare(a[0], undefined, {numeric:true}))
+        .slice(0, 10)
+    : [[ext.version, ext.files]];
+
+  const versionsHtml = versions.map(([v, f], i) => `
+    <div class="version-item ${i===0?'active':''}" onclick="selectVersion('${escHtml(v)}', '${encodeURIComponent(JSON.stringify(f || {}))}')">
+      <div>
+        <div class="version-badge">v${escHtml(v)}</div>
+        <div class="version-date">${ext.timestamp ? new Date(ext.timestamp).toLocaleDateString('id-ID',{year:'numeric',month:'short',day:'numeric'}) : ''}</div>
+      </div>
+      <span class="version-dl"><span class="mi mi-16">download</span> ${formatNum(ext.downloadCount||0)}</span>
+    </div>`).join('');
+
+  const tags = (ext.tags || []).length > 0
+    ? `<div class="tags-wrap">${ext.tags.map(t=>`<span class="tag-chip">${escHtml(t)}</span>`).join('')}</div>`
+    : '<span class="body-sm" style="color:var(--md-outline)">Tidak ada tag</span>';
+
+  const cats = (ext.categories || []).length > 0
+    ? ext.categories.join(', ')
+    : '–';
+
+  container.innerHTML = `
+    <div class="detail-hero">
+      <div class="detail-hero-top">
+        ${iconEl}
+        <div class="detail-info">
+          <div class="detail-name">${escHtml(ext.displayName || ext.name)}</div>
+          <div class="detail-publisher">${escHtml(ext.namespace)} · v${escHtml(ext.version)}</div>
+          <div class="detail-description">${escHtml(ext.description||'Tidak ada deskripsi.')}</div>
+        </div>
+      </div>
+      <div class="detail-actions">
+        ${vsixUrl ? `<a href="${vsixUrl}" download class="btn-primary" style="text-decoration:none">
+          <span class="mi mi-18">download</span> Unduh VSIX
+        </a>` : ''}
+        <a href="https://open-vsx.org/extension/${ext.namespace}/${ext.name}" target="_blank" class="btn-outlined" style="text-decoration:none">
+          <span class="mi mi-18">open_in_new</span> Open VSX
+        </a>
+        ${ext.repository ? `<a href="${escHtml(ext.repository)}" target="_blank" class="btn-tonal" style="text-decoration:none">
+          <span class="mi mi-18">code</span> Repositori
+        </a>` : ''}
+      </div>
+      <div class="detail-stats">
+        <div class="stat">
+          <div class="stat-value">${formatNum(ext.downloadCount||0)}</div>
+          <div class="stat-label">Unduhan</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${escHtml(ext.version||'–')}</div>
+          <div class="stat-label">Versi</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${cats}</div>
+          <div class="stat-label">Kategori</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${ext.license || '–'}</div>
+          <div class="stat-label">Lisensi</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title"><span class="mi mi-18">inventory_2</span> Riwayat Versi</div>
+      <div class="version-list" id="version-list">
+        ${versionsHtml}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title"><span class="mi mi-18">label</span> Tag</div>
+      ${tags}
+    </div>
+
+    ${ext.homepage || ext.bugs || ext.markdown ? `
+    <div class="detail-section">
+      <div class="detail-section-title"><span class="mi mi-18">link</span> Tautan</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${ext.homepage ? `<a class="link-external" href="${escHtml(ext.homepage)}" target="_blank"><span class="mi mi-16">open_in_new</span> Homepage</a>` : ''}
+        ${ext.bugs ? `<a class="link-external" href="${escHtml(ext.bugs)}" target="_blank"><span class="mi mi-16">bug_report</span> Issues / Bugs</a>` : ''}
+        ${ext.markdown ? `<a class="link-external" href="${escHtml(ext.markdown)}" target="_blank"><span class="mi mi-16">article</span> README</a>` : ''}
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function selectVersion(version, filesEncoded) {
+  document.querySelectorAll('.version-item').forEach((el, i) => {
+    el.classList.toggle('active', el.querySelector('.version-badge').textContent === 'v' + version);
+  });
+}
+
+function openExternal() {
+  if (currentExtUrl) window.open(currentExtUrl, '_blank');
+}
+
+// ══════════════════════════════════════════════════════════════
+// AI SEARCH (Gemini)
+// ══════════════════════════════════════════════════════════════
+async function doAiSearch() {
+  if (!STATE.geminiKey) {
+    showToast('⚠ Tambahkan Gemini API Key di Pengaturan terlebih dahulu');
+    goSettings();
+    return;
+  }
+  const query = document.getElementById('search-input').value.trim();
+  if (!query) {
+    showToast('Masukkan deskripsi ekstensi yang Anda cari');
+    return;
+  }
+
+  const btn = document.getElementById('ai-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="ai-dots"><span></span><span></span><span></span></span>';
+
+  showAiBanner(`<span class="ai-dots"><span></span><span></span><span></span></span> Gemini sedang menganalisis: "<i>${escHtml(query)}</i>"`);
+
+  try {
+    // Step 1: Ask Gemini to extract search keywords
+    const keywordPrompt = `Kamu adalah asisten pencari ekstensi VS Code di Open VSX Registry.
+Pengguna mencari: "${query}"
+Tugasmu: Ekstrak keyword pencarian terbaik untuk Open VSX API (singkat, bahasa Inggris, 1-3 kata).
+Balas HANYA dengan format JSON:
+{"keyword": "search keyword here", "explanation": "penjelasan singkat dalam bahasa Indonesia"}`;
+
+    const geminiRes = await geminiGenerate(keywordPrompt);
+    const parsed = parseGeminiJson(geminiRes);
+    const keyword = parsed?.keyword || query;
+
+    showAiBanner(`<span class="mi mi-16" style="vertical-align:middle">manage_search</span> Mencari ekstensi untuk: <b>"${escHtml(keyword)}"</b><br><span style="font-size:12px;color:var(--md-outline)">${escHtml(parsed?.explanation || '')}</span>`);
+
+    // Step 2: Fetch extensions from Open VSX
+    const searchRes = await fetch(`${API}/-/search?query=${encodeURIComponent(keyword)}&size=30&sortBy=downloadCount&sortOrder=desc`);
+    const searchData = await searchRes.json();
+    const exts = searchData.extensions || [];
+
+    if (exts.length === 0) {
+      showAiBanner('<span class="mi mi-16">search_off</span> Tidak ada ekstensi ditemukan untuk keyword tersebut.');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-icon">✦</span>AI';
+      return;
+    }
+
+    // Step 3: Ask Gemini to pick the best ones
+    const extSummary = exts.slice(0, 20).map((e, i) => ({
+      index: i,
+      name: e.name,
+      displayName: e.displayName || e.name,
+      namespace: e.namespace,
+      description: (e.description || '').slice(0, 100),
+      tags: (e.tags || []).slice(0, 5),
+      downloads: e.downloadCount || 0,
+    }));
+
+    const rankPrompt = `Kamu adalah asisten ahli ekstensi VS Code.
+Pengguna mencari: "${query}"
+Keyword yang digunakan: "${keyword}"
+
+Berikut daftar ekstensi yang ditemukan:
+${JSON.stringify(extSummary, null, 2)}
+
+Pilih 5 ekstensi TERBAIK yang paling sesuai dengan kebutuhan pengguna.
+Balas HANYA dengan JSON array (tanpa markdown/kode block):
+[
+  {"index": 0, "reason": "alasan singkat dalam bahasa Indonesia mengapa ekstensi ini cocok"},
+  ...
+]`;
+
+    const rankRes = await geminiGenerate(rankPrompt);
+    const ranked = parseGeminiJsonArray(rankRes);
+
+    if (!ranked || ranked.length === 0) {
+      showAiBanner('<span class="mi mi-16">warning</span> Gemini tidak dapat menentukan rekomendasi. Menampilkan semua hasil.');
+      STATE.query = keyword;
+      document.getElementById('search-input').value = keyword;
+      resetAndLoad();
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-icon"><span class="mi mi-18">auto_awesome</span></span>AI';
+      return;
+    }
+
+    // Render AI results
+    const chosenExts = ranked.map(r => ({
+      ext: exts[r.index],
+      reason: r.reason
+    })).filter(x => x.ext);
+
+    showAiBanner(`<span class="mi mi-16">recommend</span> Gemini memilih <b>${chosenExts.length} ekstensi terbaik</b> dari "${escHtml(keyword)}" untuk Anda.<br><span style="font-size:12px;color:var(--md-outline)">${escHtml(parsed?.explanation || '')}</span>`);
+
+    renderAiResults(chosenExts);
+
+    // Also load normal results below
+    STATE.query = keyword;
+    document.getElementById('search-input').value = keyword;
+    STATE.aiSearchMode = true;
+    resetAndLoad();
+
+  } catch (e) {
+    console.error(e);
+    showAiBanner('<span class="mi mi-16">error</span> Error: ' + e.message);
+    showToast('Terjadi error saat AI Search: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span class="btn-icon"><span class="mi mi-18">auto_awesome</span></span>AI';
+  }
+}
+
+async function geminiGenerate(prompt) {
+  if (!STATE.geminiKey) throw new Error('Tambahkan Gemini API Key di Pengaturan');
+
+  const res = await fetch('/api/genai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt,
+      apiKey: STATE.geminiKey // dikirim ke server tiap request
+    })
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error || 'Server Error');
+  }
+
+  const data = await res.json();
+  return data.text;
+}function parseGeminiJson(text) {
+  try {
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) return JSON.parse(match[0]);
+  } catch(e) {}
+  return null;
+}
+function parseGeminiJsonArray(text) {
+  try {
+    const cleaned = text.replace(/```json|```/g, '').trim();
+    const match = cleaned.match(/\[[\s\S]*\]/);
+    if (match) return JSON.parse(match[0]);
+  } catch(e) {}
+  return null;
+}
+
+function showAiBanner(html) {
+  const banner = document.getElementById('ai-banner');
+  const text = document.getElementById('ai-banner-text');
+  text.innerHTML = html;
+  banner.classList.add('show');
+}
+function hideAiBanner() {
+  document.getElementById('ai-banner').classList.remove('show');
+}
+
+function renderAiResults(items) {
+  const section = document.getElementById('ai-result-section');
+  const list = document.getElementById('ai-results-list');
+  const count = document.getElementById('ai-result-count');
+  count.textContent = items.length;
+  list.innerHTML = items.map((item, i) => `
+    <div class="ai-result-item" onclick="goDetail('${escHtml(item.ext.namespace)}', '${escHtml(item.ext.name)}')">
+      <div class="ai-result-rank">${i + 1}</div>
+      <div class="ai-result-body">
+        <div class="ai-result-name">${escHtml(item.ext.displayName || item.ext.name)}</div>
+        <div class="ai-result-reason">${escHtml(item.reason)}</div>
+      </div>
+    </div>
+  `).join('');
+  section.style.display = 'block';
+}
+
+function hideAiResults() {
+  document.getElementById('ai-result-section').style.display = 'none';
+  document.getElementById('ai-results-list').innerHTML = '';
+}
+
+// ══════════════════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════════════════
+function loadSettings() {
+  const input = document.getElementById('gemini-key-input');
+  input.value = STATE.geminiKey;
+  updateApiStatus();
+}
+
+function saveApiKey() {
+  const val = document.getElementById('gemini-key-input').value.trim();
+  STATE.geminiKey = val;
+  localStorage.setItem('gemini_api_key', val);
+  updateApiStatus();
+  showToast('API Key berhasil disimpan');
+  updateAiButtonState();
+}
+
+function updateApiStatus() {
+  const status = document.getElementById('api-status');
+  if (STATE.geminiKey) {
+    status.innerHTML = `<div class="status-chip status-ok"><span class="status-dot"></span>API Key aktif</div>`;
+  } else {
+    status.innerHTML = `<div class="status-chip status-err"><span class="status-dot"></span>Belum ada API Key — AI Search dinonaktifkan</div>`;
+  }
+}
+
+function updateAiButtonState() {
+  const btn = document.getElementById('ai-btn');
+  if (!STATE.geminiKey) {
+    btn.title = 'Tambahkan Gemini API Key di Pengaturan';
+  } else {
+    btn.title = 'AI Search dengan Gemini';
+  }
+}
+
+function toggleKeyVisibility() {
+  const input = document.getElementById('gemini-key-input');
+  const toggle = document.getElementById('key-toggle');
+  if (input.type === 'password') {
+    input.type = 'text';
+    toggle.innerHTML = '<span class="mi mi-18">visibility_off</span>';
+  } else {
+    input.type = 'password';
+    toggle.innerHTML = '<span class="mi mi-18">visibility</span>';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, duration = 3000) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), duration);
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function formatNum(n) {
+  if (n >= 1_000_000) return (n/1_000_000).toFixed(1) + 'M';
+  if (n >= 1_000) return (n/1_000).toFixed(1) + 'K';
+  return String(n);
+}
+
+// ══════════════════════════════════════════════════════════════
+// KEYBOARD SHORTCUTS
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('search-input') === document.activeElement) {
+    if (e.shiftKey) doAiSearch();
+    else doSearch();
+  }
+  if (e.key === 'Escape' && STATE.page !== 'home') goHome();
+});
+
+// ══════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════
+updateAiButtonState();
+loadExtensions();
+</script>
+</body>
+</html>
